@@ -1,30 +1,31 @@
 const express = require("express");
-const puppeteer = require("puppeteer");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get("/api", async (req, res) => {
   try {
-    const browser = await puppeteer.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
-    });
+    const r = await fetch("https://www.bitomat.com/en/bitomaty/bitomat-klodzko");
+    const html = await r.text();
 
-    const page = await browser.newPage();
+    // wyciągamy dane z JS
+    const match = html.match(/Prices data:\s*(\{.*?\})/s);
 
-    await page.goto(
-      "https://www.bitomat.com/en/bitomaty/bitomat-klodzko",
-      { waitUntil: "networkidle2" }
-    );
+    if (!match) {
+      return res.json({ error: "Nie znaleziono danych" });
+    }
 
-    await new Promise(r => setTimeout(r, 6000));
+    const json = JSON.parse(match[1]);
 
-    const text = await page.evaluate(() => document.body.innerText);
+    // spróbujmy znaleźć PLN
+    let amount = "brak";
 
-    await browser.close();
+    const text = JSON.stringify(json);
+    const pln = text.match(/(\d[\d\s]*)\s*PLN/);
 
-    const match = text.match(/(\d[\d\s]*)\s*PLN/);
-    const amount = match ? match[1].replace(/\s/g, "") : "brak";
+    if (pln) {
+      amount = pln[1].replace(/\s/g, "");
+    }
 
     res.json({
       amount,
@@ -37,5 +38,5 @@ app.get("/api", async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log("Serwer działa");
+  console.log("API działa bez Puppeteer");
 });
