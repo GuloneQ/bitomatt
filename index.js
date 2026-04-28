@@ -4,7 +4,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1498635476083675237/ENCKZutPymK2wEDvB7IW7merl0xPlPVCtH52fhTPet6Y3SYWO8LAyPHfwRzemPYEPyQl";
-const ATM_ID = 867; // zmień na 867 dla Wrocławia
+const ATM_ID = 1682; // zmień na 867 dla Wrocławia
 
 let lastState = null;
 
