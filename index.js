@@ -1,5 +1,5 @@
 const express = require("express");
-const puppeteer = require("puppeteer-core");
+const puppeteer = require("puppeteer");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -7,7 +7,6 @@ const PORT = process.env.PORT || 3000;
 app.get("/api", async (req, res) => {
   try {
     const browser = await puppeteer.launch({
-      executablePath: "/usr/bin/chromium",
       args: ["--no-sandbox", "--disable-setuid-sandbox"]
     });
 
@@ -24,10 +23,9 @@ app.get("/api", async (req, res) => {
     await browser.close();
 
     const match = text.match(/(\d[\d\s]*)\s*PLN/i);
-    const amount = match ? match[1].replace(/\s/g, "") : "brak";
 
     res.json({
-      amount,
+      amount: match ? match[1].replace(/\s/g, "") : "brak",
       time: new Date().toLocaleTimeString("pl-PL")
     });
 
@@ -36,4 +34,4 @@ app.get("/api", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => console.log("API działa na porcie " + PORT));
+app.listen(PORT, () => console.log("API działa"));
