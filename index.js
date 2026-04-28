@@ -20,6 +20,7 @@ app.get("/api", async (req, res) => {
       status: atm?.is_cash_available === 1 ? "JEST GOTÓWKA" : "BRAK GOTÓWKI",
       time: new Date().toLocaleTimeString("pl-PL")
     });
+
   } catch (e) {
     res.json({ error: e.message });
   }
