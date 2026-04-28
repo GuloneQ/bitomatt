@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.59.1-jammy
+FROM node:18
 
 WORKDIR /app
 
@@ -7,4 +7,6 @@ RUN npm install
 
 COPY . .
 
-CMD ["npm", "start"]
+EXPOSE 3000
+
+CMD ["node", "index.js"]
