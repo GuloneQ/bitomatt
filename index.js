@@ -1,13 +1,26 @@
 const express = require("express");
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") return res.sendStatus(200);
+  next();
+});
+
+app.get("/", (req, res) => {
+  res.send("API działa. Wejdź na /api");
+});
 
 app.get("/api", async (req, res) => {
   try {
     const r = await fetch("https://shitcoins.club/atms/getAtmsData");
     const data = await r.json();
 
-    const atm = data.find(x => x.id === 1682); // zmień ID jeśli chcesz
+    const atm = data.find(x => x.id === 1682);
 
     if (!atm) {
       return res.json({ error: "Nie znaleziono ATM" });
@@ -15,8 +28,7 @@ app.get("/api", async (req, res) => {
 
     const lastSeen = atm.last_seen || 0;
     const now = Math.floor(Date.now() / 1000);
-
-    const online = (now - lastSeen < 15 * 60);
+    const online = now - lastSeen < 15 * 60;
 
     res.json({
       amount: atm.balances?.PLN ?? 0,
@@ -26,8 +38,8 @@ app.get("/api", async (req, res) => {
     });
 
   } catch (e) {
-    res.json({ error: "Błąd API" });
+    res.json({ error: e.message });
   }
 });
 
-app.listen(3000, () => console.log("API działa"));
+app.listen(PORT, () => console.log("API działa na porcie " + PORT));
