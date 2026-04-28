@@ -1,7 +1,4 @@
-FROM node:20-bookworm
-
-RUN apt-get update && apt-get install -y chromium \
-  && rm -rf /var/lib/apt/lists/*
+FROM mcr.microsoft.com/playwright:v1.46.0-jammy
 
 WORKDIR /app
 
