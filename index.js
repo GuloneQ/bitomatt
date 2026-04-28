@@ -1,29 +1,36 @@
-const express = require("express");
+import express from "express";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  next();
-});
 
 app.get("/api", async (req, res) => {
   try {
     const r = await fetch("https://shitcoins.club/atms/getAtmsData");
     const data = await r.json();
 
-    const atm = data.find(x => x.id === 1682);
+    // 👉 wybierz miasto (zmień ID)
+    const atm = data.find(x => x.id === 867); // KŁODZKO
+    // const atm = data.find(x => x.id === 867); // WROCŁAW
+
+    if (!atm) {
+      return res.json({ error: "Nie znaleziono ATM" });
+    }
+
+    const lastSeen = atm.last_seen || 0;
+    const now = Math.floor(Date.now() / 1000);
+
+    const online = (now - lastSeen < 15 * 60);
 
     res.json({
-      amount: atm?.balances?.PLN ?? 0,
-      status: atm?.is_cash_available === 1 ? "JEST GOTÓWKA" : "BRAK GOTÓWKI",
-      time: new Date().toLocaleTimeString("pl-PL")
+      amount: atm.balances?.PLN ?? 0,
+      status: atm.is_cash_available === 1 ? "JEST GOTÓWKA" : "BRAK GOTÓWKI",
+      online: online ? "ONLINE" : "OFFLINE",
+      time: new Date().toLocaleTimeString("pl-PL"),
+      lastSeen: new Date(lastSeen * 1000).toLocaleString("pl-PL")
     });
 
   } catch (e) {
-    res.json({ error: e.message });
+    res.json({ error: "Błąd API" });
   }
 });
 
-app.listen(PORT, () => console.log("API działa"));
+app.listen(3000, () => console.log("API działa"));
