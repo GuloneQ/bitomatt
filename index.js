@@ -20,7 +20,7 @@ app.get("/api", async (req, res) => {
     const r = await fetch("https://shitcoins.club/atms/getAtmsData");
     const data = await r.json();
 
-    const atm = data.find(x => x.id === 867);
+    const atm = data.find(x => x.id === 1682);
 
     if (!atm) {
       return res.json({ error: "Nie znaleziono ATM" });
