@@ -1,4 +1,4 @@
-import express from "express";
+const express = require("express");
 
 const app = express();
 
@@ -7,9 +7,7 @@ app.get("/api", async (req, res) => {
     const r = await fetch("https://shitcoins.club/atms/getAtmsData");
     const data = await r.json();
 
-    // 👉 wybierz miasto (zmień ID)
-    const atm = data.find(x => x.id === 867); // KŁODZKO
-    // const atm = data.find(x => x.id === 867); // WROCŁAW
+    const atm = data.find(x => x.id === 1682); // zmień ID jeśli chcesz
 
     if (!atm) {
       return res.json({ error: "Nie znaleziono ATM" });
@@ -24,8 +22,7 @@ app.get("/api", async (req, res) => {
       amount: atm.balances?.PLN ?? 0,
       status: atm.is_cash_available === 1 ? "JEST GOTÓWKA" : "BRAK GOTÓWKI",
       online: online ? "ONLINE" : "OFFLINE",
-      time: new Date().toLocaleTimeString("pl-PL"),
-      lastSeen: new Date(lastSeen * 1000).toLocaleString("pl-PL")
+      time: new Date().toLocaleTimeString("pl-PL")
     });
 
   } catch (e) {
