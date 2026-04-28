@@ -1,35 +1,34 @@
 const express = require("express");
+const puppeteer = require("puppeteer-core");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get("/api", async (req, res) => {
   try {
-    const r = await fetch("https://www.bitomat.com/en/bitomaty/bitomat-klodzko");
-    const html = await r.text();
+    const browser = await puppeteer.launch({
+      executablePath: "/usr/bin/chromium",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    });
 
-    // wyciągamy dane z JS
-    const match = html.match(/Prices data:\s*(\{.*?\})/s);
+    const page = await browser.newPage();
 
-    if (!match) {
-      return res.json({ error: "Nie znaleziono danych" });
-    }
+    await page.goto("https://www.bitomat.com/en/bitomaty/bitomat-klodzko", {
+      waitUntil: "networkidle2",
+      timeout: 60000
+    });
 
-    const json = JSON.parse(match[1]);
+    await new Promise(r => setTimeout(r, 7000));
 
-    // spróbujmy znaleźć PLN
-    let amount = "brak";
+    const text = await page.evaluate(() => document.body.innerText);
+    await browser.close();
 
-    const text = JSON.stringify(json);
-    const pln = text.match(/(\d[\d\s]*)\s*PLN/);
-
-    if (pln) {
-      amount = pln[1].replace(/\s/g, "");
-    }
+    const match = text.match(/(\d[\d\s]*)\s*PLN/i);
+    const amount = match ? match[1].replace(/\s/g, "") : "brak";
 
     res.json({
       amount,
-      time: new Date().toLocaleTimeString()
+      time: new Date().toLocaleTimeString("pl-PL")
     });
 
   } catch (e) {
@@ -37,6 +36,4 @@ app.get("/api", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log("API działa bez Puppeteer");
-});
+app.listen(PORT, () => console.log("API działa na porcie " + PORT));
